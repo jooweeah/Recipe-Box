@@ -1,0 +1,1506 @@
+
+> I'm building a recipe manager app called Recipe Box using React, Vite,        
+Firebase Auth, and Firestore. Help me set up Firebase.                          
+
+● Let me look at the current project structure first.
+
+● Searched for 1 pattern, read 1 file (ctrl+o to expand)
+
+● Firebase is already installed. Let me check the existing source files and
+  .gitignore.
+
+● Searched for 1 pattern, read 1 file (ctrl+o to expand)
+
+● Firebase (v12.10.0) is already installed and .env is already gitignored. I'll
+  create the Firebase config file and a .env template.
+
+● Write(src\firebase.js)
+  ⎿  Wrote 17 lines to src\firebase.js
+       1 import { initializeApp } from "firebase/app";
+       2 import { getAuth } from "firebase/auth";
+       3 import { getFirestore } from "firebase/firestore";
+       4 
+       5 const firebaseConfig = {
+       6   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+       7   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+       8   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+       9   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+      10   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SEN
+         DER_ID,
+     … +7 lines (ctrl+o to expand)
+
+● Write(.env.example)
+  ⎿  Wrote 6 lines to .env.example
+      1 VITE_FIREBASE_API_KEY=
+      2 VITE_FIREBASE_AUTH_DOMAIN=
+      3 VITE_FIREBASE_PROJECT_ID=
+      4 VITE_FIREBASE_STORAGE_BUCKET=
+      5 VITE_FIREBASE_MESSAGING_SENDER_ID=
+      6 VITE_FIREBASE_APP_ID=
+
+● Done. Here's what was created:
+
+  - src/firebase.js — initializes Firebase and exports auth (Firebase Auth) and
+  db (Firestore). Import these wherever needed.
+  - .env.example — template showing all required env vars (safe to commit).
+
+  Next steps:
+
+  1. Copy .env.example to .env and fill in your values from the
+  https://console.firebase.google.com → Project Settings → Your apps → SDK
+  config.
+  2. Use in your components like:
+  import { auth, db } from "./firebase";
+  3. If you haven't yet, enable Email/Password (or other providers) in Firebase
+  Console → Authentication → Sign-in method, and create your Firestore database
+  in Firestore Database.
+
+> Done                                                                 
+
+● Great! You're all set. What do you want to build next — authentication (sign
+  up/login), or start on the recipe data/Firestore structure?
+
+> Firebase is set up with auth and db exported from firebase.js. Now build the  
+authentication flow: a Sign Up page, Login page, and logout button. Use         
+Firebase Auth email/password. After login, redirect to a home/dashboard page.   
+After logout, redirect back to login. Protect the dashboard route so            
+unauthenticated users can't access it. Use React Router for navigation.         
+
+● Read 2 files (ctrl+o to expand)
+
+● First, install React Router.
+
+● Bash(cd "C:\Users\bunbu\OneDrive\Desktop\Recipe-Box" && npm install
+      react-router-dom)
+  ⎿  added 4 packages, and audited 253 packages in 1s
+
+     40 packages are looking for funding
+     … +3 lines (ctrl+o to expand)
+
+● Now I'll build all the pieces: an auth context, protected route, Sign Up,
+  Login, and Dashboard pages, then wire up routing.
+
+● Write(src\context\AuthContext.jsx)
+  ⎿  Wrote 22 lines to src\context\AuthContext.jsx
+       1 import { createContext, useContext, useEffect, useState } from "
+         react";
+       2 import { onAuthStateChanged } from "firebase/auth";
+       3 import { auth } from "../firebase";
+       4 
+       5 const AuthContext = createContext(null);
+       6 
+       7 export function AuthProvider({ children }) {
+       8   const [user, setUser] = useState(undefined); // undefined = lo
+         ading
+       9 
+      10   useEffect(() => {
+     … +12 lines (ctrl+o to expand)
+
+● Write(src\components\ProtectedRoute.jsx)
+  ⎿  Wrote 13 lines to src\components\ProtectedRoute.jsx
+       1 import { Navigate } from "react-router-dom";
+       2 import { useAuth } from "../context/AuthContext";
+       3 
+       4 export default function ProtectedRoute({ children }) {
+       5   const user = useAuth();
+       6 
+       7   if (user === undefined) {
+       8     // Still resolving auth state — render nothing to avoid flas
+         h
+       9     return null;
+      10   }
+     … +3 lines (ctrl+o to expand)
+
+● Write(src\pages\SignUp.jsx)
+  ⎿  Wrote 85 lines to src\pages\SignUp.jsx
+       1 import { useState } from "react";
+       2 import { createUserWithEmailAndPassword } from "firebase/auth";
+       3 import { auth } from "../firebase";
+       4 import { useNavigate, Link } from "react-router-dom";
+       5 
+       6 export default function SignUp() {
+       7   const [email, setEmail] = useState("");
+       8   const [password, setPassword] = useState("");
+       9   const [error, setError] = useState("");
+      10   const [loading, setLoading] = useState(false);
+     … +75 lines (ctrl+o to expand)
+
+● Write(src\pages\Login.jsx)
+  ⎿  Wrote 84 lines to src\pages\Login.jsx
+       1 import { useState } from "react";
+       2 import { signInWithEmailAndPassword } from "firebase/auth";
+       3 import { auth } from "../firebase";
+       4 import { useNavigate, Link } from "react-router-dom";
+       5 
+       6 export default function Login() {
+       7   const [email, setEmail] = useState("");
+       8   const [password, setPassword] = useState("");
+       9   const [error, setError] = useState("");
+      10   const [loading, setLoading] = useState(false);
+     … +74 lines (ctrl+o to expand)
+
+● Write(src\pages\Dashboard.jsx)
+  ⎿  Wrote 43 lines to src\pages\Dashboard.jsx
+       1 import { signOut } from "firebase/auth";
+       2 import { auth } from "../firebase";
+       3 import { useNavigate } from "react-router-dom";
+       4 import { useAuth } from "../context/AuthContext";
+       5 
+       6 export default function Dashboard() {
+       7   const user = useAuth();
+       8   const navigate = useNavigate();
+       9 
+      10   async function handleLogout() {
+     … +33 lines (ctrl+o to expand)
+
+● Now wire everything together in App.jsx and wrap main.jsx with the
+  AuthProvider.
+
+● Write(src\App.jsx)
+  ⎿  Added 26 lines, removed 18 lines
+       1 -function App() {                                               
+       1 +import { BrowserRouter, Routes, Route, Navigate } from "react-r
+         +outer-dom";                                                    
+       2 +import { AuthProvider } from "./context/AuthContext";          
+       3 +import ProtectedRoute from "./components/ProtectedRoute";      
+       4 +import Login from "./pages/Login";                             
+       5 +import SignUp from "./pages/SignUp";                           
+       6 +import Dashboard from "./pages/Dashboard";                     
+       7 +                                                               
+       8 +export default function App() {                                
+       9    return (
+       3 -    <div className="min-h-screen bg-amber-50 flex items-center 
+         -justify-center px-4">                                          
+       4 -      <div className="text-center max-w-md">                   
+       5 -        <div className="text-6xl mb-4">🍳</div>                
+       6 -        <h1 className="text-5xl font-bold text-amber-800 mb-3 t
+         -racking-tight">                                                
+       7 -          Recipe Box                                           
+       8 -        </h1>                                                  
+       9 -        <p className="text-lg text-amber-700 mb-8">            
+      10 -          Your personal recipe manager. Save, organize, and rat
+         -e all your favorite recipes in one place.                      
+      11 -        </p>                                                   
+      12 -        <button className="bg-amber-600 hover:bg-amber-700 text
+         --white font-semibold px-8 py-3 rounded-xl transition-colors dur
+         -ation-200 text-lg cursor-pointer">                             
+      13 -          Get Started                                          
+      14 -        </button>                                              
+      15 -      </div>                                                   
+      16 -    </div>                                                     
+      17 -  )                                                            
+      10 +    <BrowserRouter>                                            
+      11 +      <AuthProvider>                                           
+      12 +        <Routes>                                               
+      13 +          <Route path="/login" element={<Login />} />          
+      14 +          <Route path="/signup" element={<SignUp />} />        
+      15 +          <Route                                               
+      16 +            path="/"                                           
+      17 +            element={                                          
+      18 +              <ProtectedRoute>                                 
+      19 +                <Dashboard />                                  
+      20 +              </ProtectedRoute>                                
+      21 +            }                                                  
+      22 +          />                                                   
+      23 +          <Route path="*" element={<Navigate to="/" replace />}
+         + />                                                            
+      24 +        </Routes>                                              
+      25 +      </AuthProvider>                                          
+      26 +    </BrowserRouter>                                           
+      27 +  );                                                           
+      28  }
+      19 -                                                               
+      20 -export default App                                             
+
+● Here's a summary of everything built:
+
+  Files created:
+  - src/context/AuthContext.jsx — AuthProvider + useAuth hook. Listens to
+  onAuthStateChanged; user is undefined while loading, null when logged out, or
+  the Firebase user object when logged in.
+  - src/components/ProtectedRoute.jsx — renders null while auth resolves,
+  redirects to /login if unauthenticated, otherwise renders children.
+  - src/pages/Login.jsx — email/password login form, redirects to / on success.
+  - src/pages/SignUp.jsx — registration form, redirects to / on success.
+  - src/pages/Dashboard.jsx — protected home page with a logout button that
+  redirects to /login.
+
+  App.jsx updated — sets up BrowserRouter, AuthProvider, and the route tree with
+   the protected / route.
+
+  Flow:
+  / (protected) ←→ /login ←→ /signup
+  unauthenticated → redirected to /login
+  after login/signup → redirected to /
+  logout → redirected to /login
+  unknown routes → redirect to /
+
+✻ Baked for 54s
+
+>  review your own work and check for: console errors, missing imports, broken  
+routes, and any edge cases like empty states or unauthenticated access. Tell me 
+ if anything looks incomplete.                                                  
+
+● Read 7 files (ctrl+o to expand)
+
+● Found 3 real issues. Fixing all of them:
+
+  Issue 1 — SignUp.jsx:21: Raw Firebase error messages exposed
+  err.message renders strings like "Firebase: Error 
+  (auth/email-already-in-use)." to the user. Login correctly uses a clean
+  generic message; SignUp doesn't.
+
+  Issue 2 — No redirect for already-authenticated users on /login and /signup
+  A logged-in user can navigate directly to /login or /signup and see the forms.
+   These routes need an auth guard.
+
+  Issue 3 — No error handling on signOut in Dashboard
+  If signOut throws, the function fails silently and the user doesn't know
+  logout failed.
+
+● Update(src\pages\SignUp.jsx)
+  ⎿  Added 2 lines, removed 1 line
+      1  import { useState } from "react";
+      2  import { createUserWithEmailAndPassword } from "firebase/auth";
+      3  import { auth } from "../firebase";
+      4 -import { useNavigate, Link } from "react-router-dom";           
+      4 +import { useNavigate, Link, Navigate } from "react-router-dom"; 
+      5 +import { useAuth } from "../context/AuthContext";               
+      6  
+      7  export default function SignUp() {
+      8    const [email, setEmail] = useState("");
+
+● Update(src\pages\Login.jsx)
+  ⎿  Added 2 lines, removed 1 line
+      1  import { useState } from "react";
+      2  import { signInWithEmailAndPassword } from "firebase/auth";
+      3  import { auth } from "../firebase";
+      4 -import { useNavigate, Link } from "react-router-dom";           
+      4 +import { useNavigate, Link, Navigate } from "react-router-dom"; 
+      5 +import { useAuth } from "../context/AuthContext";               
+      6  
+      7  export default function Login() {
+      8    const [email, setEmail] = useState("");
+
+● Update(src\pages\SignUp.jsx)
+  ⎿  Added 9 lines
+       4  import { useNavigate, Link, Navigate } from "react-router-dom";
+       5  import { useAuth } from "../context/AuthContext";
+       6  
+       7 +const FRIENDLY_ERRORS = {                                      
+       8 +  "auth/email-already-in-use": "An account with this email alre
+         +ady exists.",                                                  
+       9 +  "auth/invalid-email": "Please enter a valid email address.", 
+      10 +  "auth/weak-password": "Password must be at least 6 characters
+         +.",                                                            
+      11 +};                                                             
+      12 +                                                               
+      13  export default function SignUp() {
+      14 +  const user = useAuth();                                      
+      15    const [email, setEmail] = useState("");
+      16    const [password, setPassword] = useState("");
+      17    const [error, setError] = useState("");
+      18    const [loading, setLoading] = useState(false);
+      19    const navigate = useNavigate();
+      20  
+      21 +  if (user) return <Navigate to="/" replace />;                
+      22 +                                                               
+      23    async function handleSubmit(e) {
+      24      e.preventDefault();
+      25      setError("");
+
+● Update(src\pages\SignUp.jsx)
+  ⎿  Added 2 lines, removed 1 line
+      28        await createUserWithEmailAndPassword(auth, email, passwor
+          d);
+      29        navigate("/");
+      30      } catch (err) {
+      31 -      setError(err.message);                                   
+      31 +      const code = err.code;                                   
+      32 +      setError(FRIENDLY_ERRORS[code] ?? "Something went wrong. 
+         +Please try again.");                                           
+      33      } finally {
+      34        setLoading(false);
+      35      }
+
+● Update(src\pages\Login.jsx)
+  ⎿  Added 3 lines
+       5  import { useAuth } from "../context/AuthContext";
+       6  
+       7  export default function Login() {
+       8 +  const user = useAuth();                                      
+       9    const [email, setEmail] = useState("");
+      10    const [password, setPassword] = useState("");
+      11    const [error, setError] = useState("");
+      12    const [loading, setLoading] = useState(false);
+      13    const navigate = useNavigate();
+      14  
+      15 +  if (user) return <Navigate to="/" replace />;                
+      16 +                                                               
+      17    async function handleSubmit(e) {
+      18      e.preventDefault();
+      19      setError("");
+
+● Update(src\pages\Dashboard.jsx)
+  ⎿  Added 6 lines, removed 2 lines
+       8    const navigate = useNavigate();
+       9  
+      10    async function handleLogout() {
+      11 -    await signOut(auth);                                       
+      12 -    navigate("/login");                                        
+      11 +    try {                                                      
+      12 +      await signOut(auth);                                     
+      13 +      navigate("/login");                                      
+      14 +    } catch {                                                  
+      15 +      alert("Logout failed. Please try again.");               
+      16 +    }                                                          
+      17    }
+      18  
+      19    return (
+
+● All three issues fixed. Here's the summary:
+
+  ┌─────┬────────────────┬─────────────────────┬───────────────────────────┐
+  │  #  │      File      │        Issue        │            Fix            │
+  ├─────┼────────────────┼─────────────────────┼───────────────────────────┤
+  │     │                │ err.message exposed │ Added FRIENDLY_ERRORS map │
+  │ 1   │ SignUp.jsx     │  raw Firebase       │  keyed on err.code, with  │
+  │     │                │ strings             │ a safe fallback           │
+  ├─────┼────────────────┼─────────────────────┼───────────────────────────┤
+  │     │ Login.jsx +    │ Authenticated users │ Added if (user) return    │
+  │ 2   │ SignUp.jsx     │  could visit auth   │ <Navigate to="/" replace  │
+  │     │                │ pages               │ /> at top of each         │
+  ├─────┼────────────────┼─────────────────────┼───────────────────────────┤
+  │ 3   │ Dashboard.jsx  │ signOut failure was │ Wrapped in try/catch with │
+  │     │                │  silent             │  user-facing alert        │
+  └─────┴────────────────┴─────────────────────┴───────────────────────────┘
+
+  One thing intentionally left as-is: ProtectedRoute returns null during the
+  auth loading phase. It avoids a wrong redirect but causes a brief blank
+  screen. That's acceptable for now — it becomes worth addressing (e.g. a
+  spinner) once you have a layout shell, but it's not a bug.
+
+✻ Churned for 1m 3s
+
+> Build a form component to add a new recipe with fields: title, category       
+(dropdown: breakfast/lunch/dinner/dessert/snack), cookTime, servings, and       
+notes. Just the form UI for now, no Firebase yet.                               
+
+● Read 1 file (ctrl+o to expand)
+
+● Write(src\components\RecipeForm.jsx)
+  ⎿  Wrote 182 lines to src\components\RecipeForm.jsx
+       1 import { useState } from "react";
+       2 
+       3 const CATEGORIES = ["breakfast", "lunch", "dinner", "dessert", "
+         snack"];
+       4 
+       5 const EMPTY_FORM = {
+       6   title: "",
+       7   category: "",
+       8   cookTime: "",
+       9   servings: "",
+      10   notes: "",
+     … +172 lines (ctrl+o to expand)
+
+● Now wire it into the Dashboard so you can see it:
+
+● Update(src\pages\Dashboard.jsx)
+  ⎿  Added 2 lines
+      1 +import { useState } from "react";                               
+      2  import { signOut } from "firebase/auth";
+      3  import { auth } from "../firebase";
+      4  import { useNavigate } from "react-router-dom";
+      5  import { useAuth } from "../context/AuthContext";
+      6 +import RecipeForm from "../components/RecipeForm";              
+      7  
+      8  export default function Dashboard() {
+      9    const user = useAuth();
+
+● Update(src\pages\Dashboard.jsx)
+  ⎿  Added 1 line
+       8  export default function Dashboard() {
+       9    const user = useAuth();
+      10    const navigate = useNavigate();
+      11 +  const [showForm, setShowForm] = useState(false);             
+      12  
+      13    async function handleLogout() {
+      14      try {
+
+● Update(src\pages\Dashboard.jsx)
+  ⎿  Added 28 lines, removed 7 lines
+      37          </div>
+      38        </header>
+      39  
+      40 -      <main className="max-w-4xl mx-auto px-6 py-12 text-center
+         -">                                                             
+      41 -        <h2 className="text-3xl font-bold text-amber-800 mb-3">
+      42 -          Your Recipes                                         
+      43 -        </h2>                                                  
+      44 -        <p className="text-amber-600">                         
+      45 -          You&apos;re logged in! Your recipes will appear here.
+      46 -        </p>                                                   
+      40 +      <main className="max-w-4xl mx-auto px-6 py-10">          
+      41 +        <div className="flex items-center justify-between mb-8"
+         +>                                                              
+      42 +          <h2 className="text-3xl font-bold text-amber-800">You
+         +r Recipes</h2>                                                 
+      43 +          {!showForm && (                                      
+      44 +            <button                                            
+      45 +              onClick={() => setShowForm(true)}                
+      46 +              className="bg-amber-600 hover:bg-amber-700 text-w
+         +hite font-semibold px-4 py-2 rounded-lg text-sm transition-colo
+         +rs duration-200"                                               
+      47 +            >                                                  
+      48 +              + Add Recipe                                     
+      49 +            </button>                                          
+      50 +          )}                                                   
+      51 +        </div>                                                 
+      52 +                                                               
+      53 +        {showForm && (                                         
+      54 +          <RecipeForm                                          
+      55 +            onCancel={() => setShowForm(false)}                
+      56 +            onSubmit={(data) => {                              
+      57 +              console.log("New recipe:", data);                
+      58 +              setShowForm(false);                              
+      59 +            }}                                                 
+      60 +          />                                                   
+      61 +        )}                                                     
+      62 +                                                               
+      63 +        {!showForm && (                                        
+      64 +          <p className="text-amber-600 text-center mt-16">     
+      65 +            No recipes yet. Add your first one!                
+      66 +          </p>                                                 
+      67 +        )}                                                     
+      68        </main>
+      69      </div>
+      70    );
+
+● Done. Here's what was built:
+
+  src/components/RecipeForm.jsx
+  - Controlled form with a single fields state object — clean and easy to extend
+  - Validation on submit: title and category are required; cookTime and servings
+   must be positive numbers if provided (both are optional)
+  - Inline field-level error messages with red border highlight
+  - Errors clear individually as the user corrects each field
+  - cookTime and servings are converted to Number (or null if empty) before
+  being passed to onSubmit — ready for Firestore
+  - Accepts onSubmit(data) and onCancel props; Cancel button only renders if
+  onCancel is provided
+
+  Dashboard updated
+  - "+ Add Recipe" button toggles the form
+  - Form submits log the data to console (placeholder until Firebase is wired
+  in)
+  - Empty state message shows when no recipes exist and the form is hidden
+
+✻ Cogitated for 42s
+
+> Add dynamic ingredient fields to the recipe form where each ingredient has    
+name, amount, and unit. Users can add and remove ingredients. Also add dynamic  
+steps fields where users can add and remove steps. Both should be arrays.       
+
+● Read 1 file (ctrl+o to expand)
+
+● Write(src\components\RecipeForm.jsx)
+  ⎿  Added 146 lines, removed 14 lines
+      2  
+      3  const CATEGORIES = ["breakfast", "lunch", "dinner", "dessert", "
+         snack"];
+      4  
+      5 +const EMPTY_INGREDIENT = { name: "", amount: "", unit: "" };    
+      6  const EMPTY_FORM = {
+      7    title: "",
+      8    category: "",
+     ...
+      13  
+      14  export default function RecipeForm({ onSubmit, onCancel }) {
+      15    const [fields, setFields] = useState(EMPTY_FORM);
+      16 +  const [ingredients, setIngredients] = useState([{ ...EMPTY_IN
+         +GREDIENT }]);                                                  
+      17 +  const [steps, setSteps] = useState([""]);                    
+      18    const [errors, setErrors] = useState({});
+      19  
+      20 +  // ── Basic fields ──────────────────────────────────────────
+         +────                                                           
+      21    function handleChange(e) {
+      22      const { name, value } = e.target;
+      23      setFields((prev) => ({ ...prev, [name]: value }));
+      24      if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "
+          " }));
+      25    }
+      26  
+      27 +  // ── Ingredients ───────────────────────────────────────────
+         +────                                                           
+      28 +  function handleIngredientChange(index, e) {                  
+      29 +    const { name, value } = e.target;                          
+      30 +    setIngredients((prev) =>                                   
+      31 +      prev.map((ing, i) => (i === index ? { ...ing, [name]: val
+         +ue } : ing))                                                   
+      32 +    );                                                         
+      33 +  }                                                            
+      34 +                                                               
+      35 +  function addIngredient() {                                   
+      36 +    setIngredients((prev) => [...prev, { ...EMPTY_INGREDIENT }]
+         +);                                                             
+      37 +  }                                                            
+      38 +                                                               
+      39 +  function removeIngredient(index) {                           
+      40 +    setIngredients((prev) => prev.filter((_, i) => i !== index)
+         +);                                                             
+      41 +  }                                                            
+      42 +                                                               
+      43 +  // ── Steps ─────────────────────────────────────────────────
+         +────                                                           
+      44 +  function handleStepChange(index, e) {                        
+      45 +    const value = e.target.value;                              
+      46 +    setSteps((prev) => prev.map((s, i) => (i === index ? value 
+         +: s)));                                                        
+      47 +  }                                                            
+      48 +                                                               
+      49 +  function addStep() {                                         
+      50 +    setSteps((prev) => [...prev, ""]);                         
+      51 +  }                                                            
+      52 +                                                               
+      53 +  function removeStep(index) {                                 
+      54 +    setSteps((prev) => prev.filter((_, i) => i !== index));    
+      55 +  }                                                            
+      56 +                                                               
+      57 +  // ── Validation ────────────────────────────────────────────
+         +────                                                           
+      58    function validate() {
+      59      const next = {};
+      60      if (!fields.title.trim()) next.title = "Title is required."
+          ;
+     ...
+      66      return next;
+      67    }
+      68  
+      69 +  // ── Submit ────────────────────────────────────────────────
+         +────                                                           
+      70    function handleSubmit(e) {
+      71      e.preventDefault();
+      72      const next = validate();
+     ...
+      78        ...fields,
+      79        cookTime: fields.cookTime === "" ? null : Number(fields.c
+          ookTime),
+      80        servings: fields.servings === "" ? null : Number(fields.s
+          ervings),
+      81 +      ingredients: ingredients.filter((ing) => ing.name.trim() 
+         +!== ""),                                                       
+      82 +      steps: steps.filter((s) => s.trim() !== ""),             
+      83      });
+      84      setFields(EMPTY_FORM);
+      85 +    setIngredients([{ ...EMPTY_INGREDIENT }]);                 
+      86 +    setSteps([""]);                                            
+      87      setErrors({});
+      88    }
+      89  
+      90 +  // ── Shared styles ─────────────────────────────────────────
+         +────                                                           
+      91 +  const inputCls = (hasError) =>                               
+      92 +    `w-full border rounded-lg px-3 py-2 text-sm focus:outline-n
+         +one focus:ring-2 focus:ring-amber-400 ${                       
+      93 +      hasError ? "border-red-400" : "border-amber-200"         
+      94 +    }`;                                                        
+      95 +                                                               
+      96    return (
+      97      <form
+      98        onSubmit={handleSubmit}
+     ...
+      112            value={fields.title}
+      113            onChange={handleChange}
+      114            placeholder="e.g. Banana Pancakes"
+       69 -          className={`w-full border rounded-lg px-3 py-2 text-
+          -sm focus:outline-none focus:ring-2 focus:ring-amber-400 ${    
+       70 -            errors.title ? "border-red-400" : "border-amber-20
+          -0"                                                            
+       71 -          }`}                                                 
+      115 +          className={inputCls(errors.title)}                  
+      116          />
+      117          {errors.title && (
+      118            <p className="text-red-500 text-xs mt-1">{errors.tit
+           le}</p>
+     ...
+      128            name="category"
+      129            value={fields.category}
+      130            onChange={handleChange}
+       87 -          className={`w-full border rounded-lg px-3 py-2 text-
+          -sm focus:outline-none focus:ring-2 focus:ring-amber-400 bg-whi
+          -te ${                                                         
+       88 -            errors.category ? "border-red-400" : "border-amber
+          --200"                                                         
+       89 -          } ${!fields.category ? "text-gray-400" : "text-gray-
+          -900"}`}                                                       
+      131 +          className={`${inputCls(errors.category)} bg-white ${
+      132 +            !fields.category ? "text-gray-400" : "text-gray-90
+          +0"                                                            
+      133 +          }`}                                                 
+      134          >
+      135            <option value="" disabled>
+      136              Select a category
+     ...
+      159              onChange={handleChange}
+      160              min="1"
+      161              placeholder="e.g. 30"
+      118 -            className={`w-full border rounded-lg px-3 py-2 tex
+          -t-sm focus:outline-none focus:ring-2 focus:ring-amber-400 ${  
+      119 -              errors.cookTime ? "border-red-400" : "border-amb
+          -er-200"                                                       
+      120 -            }`}                                               
+      162 +            className={inputCls(errors.cookTime)}             
+      163            />
+      164            {errors.cookTime && (
+      165              <p className="text-red-500 text-xs mt-1">{errors.c
+           ookTime}</p>
+     ...
+      176              onChange={handleChange}
+      177              min="1"
+      178              placeholder="e.g. 4"
+      137 -            className={`w-full border rounded-lg px-3 py-2 tex
+          -t-sm focus:outline-none focus:ring-2 focus:ring-amber-400 ${  
+      138 -              errors.servings ? "border-red-400" : "border-amb
+          -er-200"                                                       
+      139 -            }`}                                               
+      179 +            className={inputCls(errors.servings)}             
+      180            />
+      181            {errors.servings && (
+      182              <p className="text-red-500 text-xs mt-1">{errors.s
+           ervings}</p>
+     ...
+      184          </div>
+      185        </div>
+      186  
+      187 +      {/* Ingredients */}                                     
+      188 +      <div className="mb-4">                                  
+      189 +        <label className="block text-sm font-medium text-amber
+          +-900 mb-2">                                                   
+      190 +          Ingredients                                         
+      191 +        </label>                                              
+      192 +        <div className="space-y-2">                           
+      193 +          {ingredients.map((ing, index) => (                  
+      194 +            <div key={index} className="flex gap-2 items-start
+          +">                                                            
+      195 +              <input                                          
+      196 +                type="text"                                   
+      197 +                name="name"                                   
+      198 +                value={ing.name}                              
+      199 +                onChange={(e) => handleIngredientChange(index,
+          + e)}                                                          
+      200 +                placeholder="Name"                            
+      201 +                className="flex-[2] border border-amber-200 ro
+          +unded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 foc
+          +us:ring-amber-400"                                            
+      202 +              />                                              
+      203 +              <input                                          
+      204 +                type="text"                                   
+      205 +                name="amount"                                 
+      206 +                value={ing.amount}                            
+      207 +                onChange={(e) => handleIngredientChange(index,
+          + e)}                                                          
+      208 +                placeholder="Amount"                          
+      209 +                className="flex-1 border border-amber-200 roun
+          +ded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus
+          +:ring-amber-400"                                              
+      210 +              />                                              
+      211 +              <input                                          
+      212 +                type="text"                                   
+      213 +                name="unit"                                   
+      214 +                value={ing.unit}                              
+      215 +                onChange={(e) => handleIngredientChange(index,
+          + e)}                                                          
+      216 +                placeholder="Unit"                            
+      217 +                className="flex-1 border border-amber-200 roun
+          +ded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus
+          +:ring-amber-400"                                              
+      218 +              />                                              
+      219 +              <button                                         
+      220 +                type="button"                                 
+      221 +                onClick={() => removeIngredient(index)}       
+      222 +                disabled={ingredients.length === 1}           
+      223 +                className="mt-0.5 text-amber-400 hover:text-re
+          +d-500 disabled:opacity-25 disabled:cursor-not-allowed text-lg 
+          +leading-none px-1 transition-colors"                          
+      224 +                aria-label="Remove ingredient"                
+      225 +              >                                               
+      226 +                ×                                             
+      227 +              </button>                                       
+      228 +            </div>                                            
+      229 +          ))}                                                 
+      230 +        </div>                                                
+      231 +        <button                                               
+      232 +          type="button"                                       
+      233 +          onClick={addIngredient}                             
+      234 +          className="mt-2 text-sm text-amber-600 hover:text-am
+          +ber-800 font-medium transition-colors"                        
+      235 +        >                                                     
+      236 +          + Add ingredient                                    
+      237 +        </button>                                             
+      238 +      </div>                                                  
+      239 +                                                              
+      240 +      {/* Steps */}                                           
+      241 +      <div className="mb-6">                                  
+      242 +        <label className="block text-sm font-medium text-amber
+          +-900 mb-2">                                                   
+      243 +          Steps                                               
+      244 +        </label>                                              
+      245 +        <div className="space-y-2">                           
+      246 +          {steps.map((step, index) => (                       
+      247 +            <div key={index} className="flex gap-2 items-start
+          +">                                                            
+      248 +              <span className="mt-2 text-xs font-semibold text
+          +-amber-400 w-5 shrink-0 text-right">                          
+      249 +                {index + 1}.                                  
+      250 +              </span>                                         
+      251 +              <textarea                                       
+      252 +                value={step}                                  
+      253 +                onChange={(e) => handleStepChange(index, e)}  
+      254 +                rows={2}                                      
+      255 +                placeholder={`Step ${index + 1}`}             
+      256 +                className="flex-1 border border-amber-200 roun
+          +ded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus
+          +:ring-amber-400 resize-none"                                  
+      257 +              />                                              
+      258 +              <button                                         
+      259 +                type="button"                                 
+      260 +                onClick={() => removeStep(index)}             
+      261 +                disabled={steps.length === 1}                 
+      262 +                className="mt-1.5 text-amber-400 hover:text-re
+          +d-500 disabled:opacity-25 disabled:cursor-not-allowed text-lg 
+          +leading-none px-1 transition-colors"                          
+      263 +                aria-label="Remove step"                      
+      264 +              >                                               
+      265 +                ×                                             
+      266 +              </button>                                       
+      267 +            </div>                                            
+      268 +          ))}                                                 
+      269 +        </div>                                                
+      270 +        <button                                               
+      271 +          type="button"                                       
+      272 +          onClick={addStep}                                   
+      273 +          className="mt-2 text-sm text-amber-600 hover:text-am
+          +ber-800 font-medium transition-colors"                        
+      274 +        >                                                     
+      275 +          + Add step                                          
+      276 +        </button>                                             
+      277 +      </div>                                                  
+      278 +                                                              
+      279        {/* Notes */}
+      280        <div className="mb-6">
+      281          <label className="block text-sm font-medium text-amber
+           -900 mb-1">
+     ...
+      285            name="notes"
+      286            value={fields.notes}
+      287            onChange={handleChange}
+      156 -          rows={4}                                            
+      157 -          placeholder="Ingredients, steps, tips…"             
+      288 +          rows={3}                                            
+      289 +          placeholder="Tips, substitutions, storage…"         
+      290            className="w-full border border-amber-200 rounded-lg
+            px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-
+           amber-400 resize-none"
+      291          />
+      292        </div>
+
+● Done. Here's what changed:
+
+  Ingredients — each row has three inputs (name, amount, unit) sized 2:1:1.
+  Managed as an array of objects in separate state from the flat form fields.
+  The × remove button is disabled when only one row remains so there's always at
+   least one.
+
+  Steps — each row is a small textarea with an auto-numbered label. Same
+  remove-disabled-at-one rule applies.
+
+  On submit, both arrays are filtered before being passed out:
+  - Ingredients: rows where name is blank are dropped
+  - Steps: blank entries are dropped
+
+  So a user can leave rows empty without polluting the saved data. The reset on
+  submit also clears both arrays back to one empty row.
+
+✻ Brewed for 36s
+
+> Review your work. The unit textbox does not fit in the container.             
+
+● Read 1 file (ctrl+o to expand)
+
+● The cause: browser inputs have an implicit min-width that prevents them from
+  shrinking inside a flex container. flex-1 and flex-[2] set how space is
+  distributed but don't override that minimum — so the unit input gets pushed
+  out. Fix is min-w-0 on all three inputs.
+
+● Update(src\components\RecipeForm.jsx)
+  ⎿  Added 3 lines, removed 3 lines
+      198                  value={ing.name}
+      199                  onChange={(e) => handleIngredientChange(index,
+            e)}
+      200                  placeholder="Name"
+      201 -                className="flex-[2] border border-amber-200 ro
+          -unded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 foc
+          -us:ring-amber-400"                                            
+      201 +                className="flex-[2] min-w-0 border border-ambe
+          +r-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ri
+          +ng-2 focus:ring-amber-400"                                    
+      202                />
+      203                <input
+      204                  type="text"
+     ...
+      206                  value={ing.amount}
+      207                  onChange={(e) => handleIngredientChange(index,
+            e)}
+      208                  placeholder="Amount"
+      209 -                className="flex-1 border border-amber-200 roun
+          -ded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus
+          -:ring-amber-400"                                              
+      209 +                className="flex-1 min-w-0 border border-amber-
+          +200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring
+          +-2 focus:ring-amber-400"                                      
+      210                />
+      211                <input
+      212                  type="text"
+     ...
+      214                  value={ing.unit}
+      215                  onChange={(e) => handleIngredientChange(index,
+            e)}
+      216                  placeholder="Unit"
+      217 -                className="flex-1 border border-amber-200 roun
+          -ded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus
+          -:ring-amber-400"                                              
+      217 +                className="flex-1 min-w-0 border border-amber-
+          +200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring
+          +-2 focus:ring-amber-400"                                      
+      218                />
+      219                <button
+      220                  type="button"
+
+● Added min-w-0 to all three ingredient inputs. This overrides the browser's
+  default min-width: auto on flex children, allowing them to shrink to their
+  assigned flex proportions instead of overflowing the container.
+
+> Now wire up the recipe form to Firestore. On submit, save the recipe to       
+Firestore under the logged-in user's userId. Show a success message after       
+saving.                                                                         
+
+● Read 1 file (ctrl+o to expand)
+
+● The save logic belongs in Dashboard (it owns the user and controls the form),
+  and RecipeForm just needs a saving prop to disable the button during the
+  write. I'll also add a saveError prop so the form can surface Firestore errors
+   inline rather than via alert.
+
+● Update(src\pages\Dashboard.jsx)
+  ⎿  Added 36 lines, removed 8 lines
+      1  import { useState } from "react";
+      2  import { signOut } from "firebase/auth";
+      3 -import { auth } from "../firebase";                             
+      3 +import { collection, addDoc, serverTimestamp } from "firebase/fi
+        +restore";                                                       
+      4 +import { auth, db } from "../firebase";                         
+      5  import { useNavigate } from "react-router-dom";
+      6  import { useAuth } from "../context/AuthContext";
+      7  import RecipeForm from "../components/RecipeForm";
+     ...
+      10    const user = useAuth();
+      11    const navigate = useNavigate();
+      12    const [showForm, setShowForm] = useState(false);
+      13 +  const [saving, setSaving] = useState(false);                 
+      14 +  const [saveError, setSaveError] = useState("");              
+      15 +  const [successMessage, setSuccessMessage] = useState("");    
+      16  
+      17    async function handleLogout() {
+      18      try {
+     ...
+      23      }
+      24    }
+      25  
+      26 +  async function handleSaveRecipe(data) {                      
+      27 +    setSaving(true);                                           
+      28 +    setSaveError("");                                          
+      29 +    try {                                                      
+      30 +      await addDoc(collection(db, "users", user.uid, "recipes")
+         +, {                                                            
+      31 +        ...data,                                               
+      32 +        createdAt: serverTimestamp(),                          
+      33 +      });                                                      
+      34 +      setShowForm(false);                                      
+      35 +      setSuccessMessage(`"${data.title}" saved!`);             
+      36 +      setTimeout(() => setSuccessMessage(""), 4000);           
+      37 +    } catch (err) {                                            
+      38 +      setSaveError("Failed to save recipe. Please try again.");
+      39 +      console.error(err);                                      
+      40 +    } finally {                                                
+      41 +      setSaving(false);                                        
+      42 +    }                                                          
+      43 +  }                                                            
+      44 +                                                               
+      45    return (
+      46      <div className="min-h-screen bg-amber-50">
+      47        <header className="bg-white shadow-sm px-6 py-4 flex item
+          s-center justify-between">
+     ...
+      65            <h2 className="text-3xl font-bold text-amber-800">You
+          r Recipes</h2>
+      66            {!showForm && (
+      67              <button
+      45 -              onClick={() => setShowForm(true)}                
+      68 +              onClick={() => { setShowForm(true); setSaveError(
+         +""); }}                                                        
+      69                className="bg-amber-600 hover:bg-amber-700 text-w
+          hite font-semibold px-4 py-2 rounded-lg text-sm transition-colo
+          rs duration-200"
+      70              >
+      71                + Add Recipe
+     ...
+      73            )}
+      74          </div>
+      75  
+      76 +        {successMessage && (                                   
+      77 +          <div className="mb-6 px-4 py-3 bg-green-50 border bor
+         +der-green-200 text-green-700 text-sm rounded-lg">              
+      78 +            {successMessage}                                   
+      79 +          </div>                                               
+      80 +        )}                                                     
+      81 +                                                               
+      82          {showForm && (
+      83            <RecipeForm
+      55 -            onCancel={() => setShowForm(false)}                
+      56 -            onSubmit={(data) => {                              
+      57 -              console.log("New recipe:", data);                
+      58 -              setShowForm(false);                              
+      59 -            }}                                                 
+      84 +            onCancel={() => { setShowForm(false); setSaveError(
+         +""); }}                                                        
+      85 +            onSubmit={handleSaveRecipe}                        
+      86 +            saving={saving}                                    
+      87 +            saveError={saveError}                              
+      88            />
+      89          )}
+      90  
+      63 -        {!showForm && (                                        
+      91 +        {!showForm && !successMessage && (                     
+      92            <p className="text-amber-600 text-center mt-16">
+      93              No recipes yet. Add your first one!
+      94            </p>
+
+● Now update RecipeForm to accept and use the saving and saveError props:
+
+● Update(src\components\RecipeForm.jsx)
+  ⎿  Added 1 line, removed 1 line
+      11    notes: "",
+      12  };
+      13  
+      14 -export default function RecipeForm({ onSubmit, onCancel }) {   
+      14 +export default function RecipeForm({ onSubmit, onCancel, saving
+         + = false, saveError = "" }) {                                  
+      15    const [fields, setFields] = useState(EMPTY_FORM);
+      16    const [ingredients, setIngredients] = useState([{ ...EMPTY_IN
+          GREDIENT }]);
+      17    const [steps, setSteps] = useState([""]);
+
+● Update(src\components\RecipeForm.jsx)
+  ⎿  Added 10 lines, removed 3 lines
+      292        </div>
+      293  
+      294        {/* Actions */}
+      295 +      {saveError && (                                         
+      296 +        <p className="text-red-600 text-sm mb-4 bg-red-50 bord
+          +er border-red-200 rounded-lg px-3 py-2">                      
+      297 +          {saveError}                                         
+      298 +        </p>                                                  
+      299 +      )}                                                      
+      300        <div className="flex gap-3 justify-end">
+      301          {onCancel && (
+      302            <button
+      303              type="button"
+      304              onClick={onCancel}
+      300 -            className="px-4 py-2 text-sm font-medium text-ambe
+          -r-700 bg-amber-100 hover:bg-amber-200 rounded-lg transition-co
+          -lors duration-200"                                            
+      305 +            disabled={saving}                                 
+      306 +            className="px-4 py-2 text-sm font-medium text-ambe
+          +r-700 bg-amber-100 hover:bg-amber-200 disabled:opacity-50 roun
+          +ded-lg transition-colors duration-200"                        
+      307            >
+      308              Cancel
+      309            </button>
+      310          )}
+      311          <button
+      312            type="submit"
+      307 -          className="px-5 py-2 text-sm font-semibold text-whit
+          -e bg-amber-600 hover:bg-amber-700 rounded-lg transition-colors
+          - duration-200"                                                
+      313 +          disabled={saving}                                   
+      314 +          className="px-5 py-2 text-sm font-semibold text-whit
+          +e bg-amber-600 hover:bg-amber-700 disabled:opacity-50 rounded-
+          +lg transition-colors duration-200"                            
+      315          >
+      309 -          Save Recipe                                         
+      316 +          {saving ? "Saving…" : "Save Recipe"}                
+      317          </button>
+      318        </div>
+      319      </form>
+
+● Here's what was wired up:
+
+  Firestore write — recipes are saved to users/{uid}/recipes, scoped per user.
+  Each document includes all form data plus a createdAt server timestamp.
+
+  State flow in Dashboard:
+  - saving — disables both form buttons and changes "Save Recipe" → "Saving…"
+  while the write is in flight
+  - saveError — shown inline above the form buttons if Firestore throws; cleared
+   when the form is reopened
+  - successMessage — green banner shown after a successful save with the recipe
+  title, auto-dismisses after 4 seconds
+
+  RecipeForm stays purely presentational — it only receives saving and saveError
+   as props and has no knowledge of Firebase itself.
+
+  One thing to confirm in Firebase Console: your Firestore security rules should
+   allow authenticated users to read/write their own subcollection. The minimal
+  rule is:
+  match /users/{userId}/recipes/{recipeId} {
+    allow read, write: if request.auth.uid == userId;
+  }
+
+✻ Cogitated for 43s
+
+> Build a recipe list on the dashboard that fetches and displays the current    
+user's recipes from Firestore. Each recipe card should have an edit button that 
+ opens the form pre-filled, and a delete button that removes it from Firestore. 
+
+● Read 2 files (ctrl+o to expand)
+
+● Good picture of the current state. Here's the plan:
+  - RecipeCard — new component for displaying a recipe
+  - RecipeForm — accept initialData to pre-fill for editing; use key in
+  Dashboard to force remount when switching between recipes
+  - Dashboard — real-time onSnapshot listener, editingRecipe state, updateDoc
+  for saves, deleteDoc for deletes
+
+● Write(src\components\RecipeCard.jsx)
+  ⎿  Wrote 69 lines to src\components\RecipeCard.jsx
+       1 const CATEGORY_COLORS = {
+       2   breakfast: "bg-yellow-100 text-yellow-800",
+       3   lunch:     "bg-green-100 text-green-800",
+       4   dinner:    "bg-blue-100 text-blue-800",
+       5   dessert:   "bg-pink-100 text-pink-800",
+       6   snack:     "bg-purple-100 text-purple-800",
+       7 };
+       8 
+       9 export default function RecipeCard({ recipe, onEdit, onDelete, d
+         eleting }) {
+      10   const { title, category, cookTime, servings, ingredients = [],
+          steps = [], notes } = recipe;
+     … +59 lines (ctrl+o to expand)
+
+● Now update RecipeForm to accept and initialise from initialData:
+
+● Update(src\components\RecipeForm.jsx)
+  ⎿  Added 12 lines, removed 4 lines
+      11    notes: "",
+      12  };
+      13  
+      14 -export default function RecipeForm({ onSubmit, onCancel, saving
+         - = false, saveError = "" }) {                                  
+      15 -  const [fields, setFields] = useState(EMPTY_FORM);            
+      16 -  const [ingredients, setIngredients] = useState([{ ...EMPTY_IN
+         -GREDIENT }]);                                                  
+      17 -  const [steps, setSteps] = useState([""]);                    
+      14 +export default function RecipeForm({ onSubmit, onCancel, saving
+         + = false, saveError = "", initialData = null }) {              
+      15 +  const [fields, setFields] = useState(() =>                   
+      16 +    initialData                                                
+      17 +      ? { title: initialData.title ?? "", category: initialData
+         +.category ?? "", cookTime: initialData.cookTime ?? "", servings
+         +: initialData.servings ?? "", notes: initialData.notes ?? "" } 
+      18 +      : EMPTY_FORM                                             
+      19 +  );                                                           
+      20 +  const [ingredients, setIngredients] = useState(() =>         
+      21 +    initialData?.ingredients?.length ? initialData.ingredients 
+         +: [{ ...EMPTY_INGREDIENT }]                                    
+      22 +  );                                                           
+      23 +  const [steps, setSteps] = useState(() =>                     
+      24 +    initialData?.steps?.length ? initialData.steps : [""]      
+      25 +  );                                                           
+      26    const [errors, setErrors] = useState({});
+      27  
+      28    // ── Basic fields ──────────────────────────────────────────
+          ────
+
+● Update(src\components\RecipeForm.jsx)
+  ⎿  Added 1 line, removed 1 line
+      107        noValidate
+      108        className="bg-white rounded-2xl shadow-md p-6 w-full max
+           -w-lg"
+      109      >
+      110 -      <h2 className="text-xl font-bold text-amber-800 mb-5">Ne
+          -w Recipe</h2>                                                 
+      110 +      <h2 className="text-xl font-bold text-amber-800 mb-5">{i
+          +nitialData ? "Edit Recipe" : "New Recipe"}</h2>               
+      111  
+      112        {/* Title */}
+      113        <div className="mb-4">
+
+● Now rewrite Dashboard with the full recipe list, real-time listener, edit, and
+   delete:
+
+● Write(src\pages\Dashboard.jsx)
+  ⎿  Added 101 lines, removed 17 lines
+       1 -import { useState } from "react";                              
+       1 +import { useState, useEffect } from "react";                   
+       2  import { signOut } from "firebase/auth";
+       3 -import { collection, addDoc, serverTimestamp } from "firebase/f
+         -irestore";                                                     
+       3 +import { collection, addDoc, updateDoc, deleteDoc, doc, onSnaps
+         +hot, serverTimestamp, query, orderBy } from "firebase/firestore
+         +";                                                             
+       4  import { auth, db } from "../firebase";
+       5  import { useNavigate } from "react-router-dom";
+       6  import { useAuth } from "../context/AuthContext";
+       7  import RecipeForm from "../components/RecipeForm";
+       8 +import RecipeCard from "../components/RecipeCard";             
+       9  
+      10  export default function Dashboard() {
+      11    const user = useAuth();
+      12    const navigate = useNavigate();
+      13 +                                                               
+      14 +  const [recipes, setRecipes] = useState([]);                  
+      15 +  const [loadingRecipes, setLoadingRecipes] = useState(true);  
+      16 +                                                               
+      17    const [showForm, setShowForm] = useState(false);
+      18 +  const [editingRecipe, setEditingRecipe] = useState(null); // 
+         +null = add mode                                                
+      19 +                                                               
+      20    const [saving, setSaving] = useState(false);
+      21    const [saveError, setSaveError] = useState("");
+      22    const [successMessage, setSuccessMessage] = useState("");
+      23 +  const [deletingId, setDeletingId] = useState(null);          
+      24  
+      25 +  // ── Real-time listener ────────────────────────────────────
+         +────                                                           
+      26 +  useEffect(() => {                                            
+      27 +    const recipesRef = collection(db, "users", user.uid, "recip
+         +es");                                                          
+      28 +    const q = query(recipesRef, orderBy("createdAt", "desc")); 
+      29 +    const unsubscribe = onSnapshot(q, (snapshot) => {          
+      30 +      setRecipes(snapshot.docs.map((d) => ({ id: d.id, ...d.dat
+         +a() })));                                                      
+      31 +      setLoadingRecipes(false);                                
+      32 +    }, (err) => {                                              
+      33 +      console.error("Failed to load recipes:", err);           
+      34 +      setLoadingRecipes(false);                                
+      35 +    });                                                        
+      36 +    return unsubscribe;                                        
+      37 +  }, [user.uid]);                                              
+      38 +                                                               
+      39 +  // ── Auth ──────────────────────────────────────────────────
+         +────                                                           
+      40    async function handleLogout() {
+      41      try {
+      42        await signOut(auth);
+     ...
+      46      }
+      47    }
+      48  
+      49 +  // ── Form open/close ───────────────────────────────────────
+         +────                                                           
+      50 +  function openAddForm() {                                     
+      51 +    setEditingRecipe(null);                                    
+      52 +    setSaveError("");                                          
+      53 +    setShowForm(true);                                         
+      54 +  }                                                            
+      55 +                                                               
+      56 +  function openEditForm(recipe) {                              
+      57 +    setEditingRecipe(recipe);                                  
+      58 +    setSaveError("");                                          
+      59 +    setShowForm(true);                                         
+      60 +  }                                                            
+      61 +                                                               
+      62 +  function closeForm() {                                       
+      63 +    setShowForm(false);                                        
+      64 +    setEditingRecipe(null);                                    
+      65 +    setSaveError("");                                          
+      66 +  }                                                            
+      67 +                                                               
+      68 +  // ── Save (add or update) ──────────────────────────────────
+         +────                                                           
+      69    async function handleSaveRecipe(data) {
+      70      setSaving(true);
+      71      setSaveError("");
+      72      try {
+      30 -      await addDoc(collection(db, "users", user.uid, "recipes")
+         -, {                                                            
+      31 -        ...data,                                               
+      32 -        createdAt: serverTimestamp(),                          
+      33 -      });                                                      
+      34 -      setShowForm(false);                                      
+      35 -      setSuccessMessage(`"${data.title}" saved!`);             
+      73 +      if (editingRecipe) {                                     
+      74 +        await updateDoc(doc(db, "users", user.uid, "recipes", e
+         +ditingRecipe.id), {                                            
+      75 +          ...data,                                             
+      76 +          updatedAt: serverTimestamp(),                        
+      77 +        });                                                    
+      78 +        setSuccessMessage(`"${data.title}" updated!`);         
+      79 +      } else {                                                 
+      80 +        await addDoc(collection(db, "users", user.uid, "recipes
+         +"), {                                                          
+      81 +          ...data,                                             
+      82 +          createdAt: serverTimestamp(),                        
+      83 +        });                                                    
+      84 +        setSuccessMessage(`"${data.title}" saved!`);           
+      85 +      }                                                        
+      86 +      closeForm();                                             
+      87        setTimeout(() => setSuccessMessage(""), 4000);
+      88      } catch (err) {
+      89        setSaveError("Failed to save recipe. Please try again.");
+     ...
+       93      }
+       94    }
+       95  
+       96 +  // ── Delete ───────────────────────────────────────────────
+          +─────                                                         
+       97 +  async function handleDelete(recipe) {                       
+       98 +    if (!window.confirm(`Delete "${recipe.title}"? This can't 
+          +be undone.`)) return;                                         
+       99 +    setDeletingId(recipe.id);                                 
+      100 +    try {                                                     
+      101 +      await deleteDoc(doc(db, "users", user.uid, "recipes", re
+          +cipe.id));                                                    
+      102 +    } catch (err) {                                           
+      103 +      alert("Failed to delete recipe. Please try again.");    
+      104 +      console.error(err);                                     
+      105 +    } finally {                                               
+      106 +      setDeletingId(null);                                    
+      107 +    }                                                         
+      108 +  }                                                           
+      109 +                                                              
+      110 +  // ── Render ───────────────────────────────────────────────
+          +─────                                                         
+      111    return (
+      112      <div className="min-h-screen bg-amber-50">
+      113        <header className="bg-white shadow-sm px-6 py-4 flex ite
+           ms-center justify-between">
+     ...
+      127        </header>
+      128  
+      129        <main className="max-w-4xl mx-auto px-6 py-10">
+       64 -        <div className="flex items-center justify-between mb-8
+          -">                                                            
+      130 +        <div className="flex items-center justify-between mb-6
+          +">                                                            
+      131            <h2 className="text-3xl font-bold text-amber-800">Yo
+           ur Recipes</h2>
+      132            {!showForm && (
+      133              <button
+       68 -              onClick={() => { setShowForm(true); setSaveError
+          -(""); }}                                                      
+      134 +              onClick={openAddForm}                           
+      135                className="bg-amber-600 hover:bg-amber-700 text-
+           white font-semibold px-4 py-2 rounded-lg text-sm transition-co
+           lors duration-200"
+      136              >
+      137                + Add Recipe
+     ...
+      146          )}
+      147  
+      148          {showForm && (
+       83 -          <RecipeForm                                         
+       84 -            onCancel={() => { setShowForm(false); setSaveError
+          -(""); }}                                                      
+       85 -            onSubmit={handleSaveRecipe}                       
+       86 -            saving={saving}                                   
+       87 -            saveError={saveError}                             
+       88 -          />                                                  
+      149 +          <div className="mb-8">                              
+      150 +            <RecipeForm                                       
+      151 +              key={editingRecipe?.id ?? "new"}                
+      152 +              initialData={editingRecipe}                     
+      153 +              onCancel={closeForm}                            
+      154 +              onSubmit={handleSaveRecipe}                     
+      155 +              saving={saving}                                 
+      156 +              saveError={saveError}                           
+      157 +            />                                                
+      158 +          </div>                                              
+      159          )}
+      160  
+       91 -        {!showForm && !successMessage && (                    
+      161 +        {loadingRecipes ? (                                   
+      162 +          <p className="text-amber-500 text-center mt-16">Load
+          +ing recipes…</p>                                              
+      163 +        ) : recipes.length === 0 ? (                          
+      164            <p className="text-amber-600 text-center mt-16">
+      165              No recipes yet. Add your first one!
+      166            </p>
+      167 +        ) : (                                                 
+      168 +          <div className="grid grid-cols-1 sm:grid-cols-2 lg:g
+          +rid-cols-3 gap-4">                                            
+      169 +            {recipes.map((recipe) => (                        
+      170 +              <RecipeCard                                     
+      171 +                key={recipe.id}                               
+      172 +                recipe={recipe}                               
+      173 +                onEdit={() => openEditForm(recipe)}           
+      174 +                onDelete={() => handleDelete(recipe)}         
+      175 +                deleting={deletingId === recipe.id}           
+      176 +              />                                              
+      177 +            ))}                                               
+      178 +          </div>                                              
+      179          )}
+      180        </main>
+      181      </div>
+
+● Here's everything that was built:
+
+  RecipeCard — displays title, category badge (colour-coded per category), cook
+  time, servings, ingredient/step counts, and a truncated notes preview. Edit
+  and Delete buttons at the bottom; Delete shows "Deleting…" while in flight.
+
+  RecipeForm changes — accepts initialData prop; state is lazily initialised
+  from it so all fields are pre-filled in edit mode. Heading switches between
+  "New Recipe" / "Edit Recipe". key={editingRecipe?.id ?? "new"} in Dashboard
+  forces a clean remount when switching between recipes or from edit to new — no
+   stale state issues.
+
+  Dashboard changes:
+
+  ┌──────────────┬──────────────────────────────────────────────────────────┐
+  │   Concern    │                          Detail                          │
+  ├──────────────┼──────────────────────────────────────────────────────────┤
+  │ Fetching     │ onSnapshot with orderBy("createdAt", "desc") — list      │
+  │              │ updates in real time                                     │
+  ├──────────────┼──────────────────────────────────────────────────────────┤
+  │ Loading      │ "Loading recipes…" shown until first snapshot arrives    │
+  │ state        │                                                          │
+  ├──────────────┼──────────────────────────────────────────────────────────┤
+  │ Add          │ addDoc with createdAt timestamp                          │
+  ├──────────────┼──────────────────────────────────────────────────────────┤
+  │ Edit         │ updateDoc with updatedAt timestamp; existing createdAt   │
+  │              │ is preserved                                             │
+  ├──────────────┼──────────────────────────────────────────────────────────┤
+  │ Delete       │ window.confirm guard → deleteDoc; deletingId tracks      │
+  │              │ which card is in flight                                  │
+  ├──────────────┼──────────────────────────────────────────────────────────┤
+  │ Success      │ Shows recipe title, auto-clears after 4 seconds for both │
+  │ banner       │  add and edit                                            │
+  └──────────────┴──────────────────────────────────────────────────────────┘
+
+✻ Cooked for 1m 15s
+
+> Review your own work and check for: console errors, missing imports, broken   
+routes, and any edge cases like empty states or unauthenticated access. Tell me 
+ if anything looks incomplete.                                                  
+
+● Read 3 files (ctrl+o to expand)
+
+● Found 3 real bugs. Here's what they are and the fixes:
+
+  ---
+  Bug 1 — RecipeForm: form resets even when save fails
+  handleSubmit calls onSubmit(data) then immediately resets all fields. Since
+  handleSaveRecipe is async, if Firestore throws, closeForm() is never called —
+  but the form is now blank. The user loses all their edits. The reset is
+  redundant anyway because success unmounts the form via closeForm().
+
+● Update(src\components\RecipeForm.jsx)
+  ⎿  Removed 4 lines
+      89        ingredients: ingredients.filter((ing) => ing.name.trim() 
+          !== ""),
+      90        steps: steps.filter((s) => s.trim() !== ""),
+      91      });
+      92 -    setFields(EMPTY_FORM);                                     
+      93 -    setIngredients([{ ...EMPTY_INGREDIENT }]);                 
+      94 -    setSteps([""]);                                            
+      95 -    setErrors({});                                             
+      92    }
+      93  
+      94    // ── Shared styles ─────────────────────────────────────────
+          ────
+
+● Bug 2 — Dashboard: successMessage timer leaks across saves
+  Two quick saves within 4 seconds: the first setTimeout fires and clears the
+  second message early. Fix with a useRef to cancel the previous timer before
+  starting a new one.
+
+  Bug 3 — Dashboard: empty-state shown alongside the add form
+  When recipes.length === 0 and the form is open, "No recipes yet" renders below
+   the form simultaneously. Fix by gating it on !showForm.
+
+● Update(src\pages\Dashboard.jsx)
+  ⎿  Added 1 line, removed 1 line
+      1 -import { useState, useEffect } from "react";                    
+      1 +import { useState, useEffect, useRef } from "react";            
+      2  import { signOut } from "firebase/auth";
+      3  import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapsh
+         ot, serverTimestamp, query, orderBy } from "firebase/firestore";
+      4  import { auth, db } from "../firebase";
+
+● Update(src\pages\Dashboard.jsx)
+  ⎿  Added 1 line
+      21    const [saveError, setSaveError] = useState("");
+      22    const [successMessage, setSuccessMessage] = useState("");
+      23    const [deletingId, setDeletingId] = useState(null);
+      24 +  const successTimerRef = useRef(null);                        
+      25  
+      26    // ── Real-time listener ────────────────────────────────────
+          ────
+      27    useEffect(() => {
+
+● Update(src\pages\Dashboard.jsx)
+  ⎿  Added 2 lines, removed 1 line
+      85          setSuccessMessage(`"${data.title}" saved!`);
+      86        }
+      87        closeForm();
+      88 -      setTimeout(() => setSuccessMessage(""), 4000);           
+      88 +      clearTimeout(successTimerRef.current);                   
+      89 +      successTimerRef.current = setTimeout(() => setSuccessMess
+         +age(""), 4000);                                                
+      90      } catch (err) {
+      91        setSaveError("Failed to save recipe. Please try again.");
+      92        console.error(err);
+
+● Update(src\pages\Dashboard.jsx)
+  ⎿  Added 1 line, removed 1 line
+      162  
+      163          {loadingRecipes ? (
+      164            <p className="text-amber-500 text-center mt-16">Load
+           ing recipes…</p>
+      165 -        ) : recipes.length === 0 ? (                          
+      165 +        ) : recipes.length === 0 && !showForm ? (             
+      166            <p className="text-amber-600 text-center mt-16">
+      167              No recipes yet. Add your first one!
+      168            </p>
+
+● All three fixed. Summary:
+
+  #: 1
+  File: RecipeForm.jsx
+  Bug: Form fields wiped on submit before async save resolves — edit data lost
+  on
+    Firestore error
+  Fix: Removed the redundant reset; form unmounts on success, stays populated on
+
+    failure
+  ────────────────────────────────────────
+  #: 2
+  File: Dashboard.jsx
+  Bug: setTimeout for success banner leaked across multiple saves — earlier
+  timer
+    could clear a later message
+  Fix: Added successTimerRef to clearTimeout before each new timer
+  ────────────────────────────────────────
+  #: 3
+  File: Dashboard.jsx
+  Bug: "No recipes yet" rendered alongside the add form when recipe list was
+    empty
+  Fix: Added && !showForm guard to the empty-state condition
+
+  Everything else checked out — all imports are present, routes are correct,
+  auth guards work for both directions (unauth → /login, auth → /), and
+  Firestore operations are all properly scoped to user.uid.
+
+✻ Brewed for 1m 1s
