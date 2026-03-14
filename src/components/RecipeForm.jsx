@@ -195,40 +195,42 @@ export default function RecipeForm({ onSubmit, onCancel, saving = false, saveErr
         </label>
         <div className="space-y-2">
           {ingredients.map((ing, index) => (
-            <div key={index} className="flex gap-2 items-start">
+            <div key={index} className="flex flex-col gap-1.5 sm:flex-row sm:items-start sm:gap-2">
               <input
                 type="text"
                 name="name"
                 value={ing.name}
                 onChange={(e) => handleIngredientChange(index, e)}
                 placeholder="Name"
-                className="flex-[2] min-w-0 border border-amber-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+                className="w-full sm:flex-[2] min-w-0 border border-amber-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
               />
-              <input
-                type="text"
-                name="amount"
-                value={ing.amount}
-                onChange={(e) => handleIngredientChange(index, e)}
-                placeholder="Amount"
-                className="flex-1 min-w-0 border border-amber-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
-              />
-              <input
-                type="text"
-                name="unit"
-                value={ing.unit}
-                onChange={(e) => handleIngredientChange(index, e)}
-                placeholder="Unit"
-                className="flex-1 min-w-0 border border-amber-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
-              />
-              <button
-                type="button"
-                onClick={() => removeIngredient(index)}
-                disabled={ingredients.length === 1}
-                className="mt-0.5 text-amber-400 hover:text-red-500 disabled:opacity-25 disabled:cursor-not-allowed text-lg leading-none px-1 transition-colors"
-                aria-label="Remove ingredient"
-              >
-                ×
-              </button>
+              <div className="flex gap-2 items-center">
+                <input
+                  type="text"
+                  name="amount"
+                  value={ing.amount}
+                  onChange={(e) => handleIngredientChange(index, e)}
+                  placeholder="Amount"
+                  className="flex-1 min-w-0 border border-amber-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+                />
+                <input
+                  type="text"
+                  name="unit"
+                  value={ing.unit}
+                  onChange={(e) => handleIngredientChange(index, e)}
+                  placeholder="Unit"
+                  className="flex-1 min-w-0 border border-amber-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400"
+                />
+                <button
+                  type="button"
+                  onClick={() => removeIngredient(index)}
+                  disabled={ingredients.length === 1}
+                  className="text-amber-400 hover:text-red-500 disabled:opacity-25 disabled:cursor-not-allowed text-lg leading-none px-1 transition-colors shrink-0"
+                  aria-label="Remove ingredient"
+                >
+                  ×
+                </button>
+              </div>
             </div>
           ))}
         </div>

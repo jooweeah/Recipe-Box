@@ -20,7 +20,6 @@ Use Tailwind CSS for styling. Keep it clean and minimal.
 │                     ▘▘ ▝▝                    │                               │
 │                                              │                               │
 │           Sonnet 4.6 · Claude Pro            │                               │
-│   ~\OneDrive\Desktop\Recipe-Box\Recipe-Box   │                               │
 ╰──────────────────────────────────────────────────────────────────────────────╯
 
 > Describe what we have done 

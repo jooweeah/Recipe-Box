@@ -21,7 +21,7 @@ export default function Login() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       navigate("/");
-    } catch (err) {
+    } catch {
       setError("Invalid email or password.");
     } finally {
       setLoading(false);
