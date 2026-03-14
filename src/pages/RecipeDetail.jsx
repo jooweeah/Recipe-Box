@@ -254,10 +254,10 @@ export default function RecipeDetail() {
             <h2 className="text-lg font-bold text-amber-800 mb-3">Ingredients</h2>
             <ul className="bg-white rounded-2xl border border-amber-100 divide-y divide-amber-50">
               {ingredients.map((ing, i) => (
-                <li key={i} className="flex items-center justify-between px-4 py-3 text-sm">
-                  <span className="text-gray-800 font-medium">{ing.name}</span>
+                <li key={i} className="flex items-center justify-between px-4 py-3">
+                  <span className="text-gray-800 font-medium text-base">{ing.name}</span>
                   {(ing.amount || ing.unit) && (
-                    <span className="text-gray-500">
+                    <span className="text-gray-500 text-sm">
                       {[scaleAmount(ing.amount, factor), ing.unit].filter(Boolean).join(" ")}
                     </span>
                   )}
