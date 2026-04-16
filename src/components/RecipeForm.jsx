@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 
 const CATEGORIES = ["breakfast", "lunch", "dinner", "dessert", "snack"];
+const OLLAMA_MODEL = "gemma4:e2b";
 
 const EMPTY_INGREDIENT = { name: "", amount: "", unit: "" };
 const EMPTY_FORM = {
@@ -10,6 +11,30 @@ const EMPTY_FORM = {
   servings: "",
   notes: "",
 };
+
+async function fetchRecipeSuggestion(title) {
+  const prompt = `You are a recipe assistant. Given a recipe title, return a JSON object with these exact keys:
+- category: one of "breakfast", "lunch", "dinner", "dessert", "snack"
+- cookTime: cook time in minutes as a number
+- servings: number of servings as a number
+- notes: a short string with helpful tips or substitutions
+- ingredients: an array of objects, each with "name" (string), "amount" (string), and "unit" (string)
+- steps: an array of strings, each being one cooking step
+
+Recipe title: "${title}"
+
+Respond with only valid JSON, no extra text.`;
+
+  const res = await fetch("http://localhost:11434/api/generate", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ model: OLLAMA_MODEL, prompt, format: "json", stream: false }),
+  });
+
+  if (!res.ok) throw new Error(`Ollama error: ${res.status} ${res.statusText}`);
+  const data = await res.json();
+  return JSON.parse(data.response);
+}
 
 export default function RecipeForm({ onSubmit, onCancel, saving = false, saveError = "", initialData = null }) {
   const [fields, setFields] = useState(() =>
@@ -24,6 +49,42 @@ export default function RecipeForm({ onSubmit, onCancel, saving = false, saveErr
     initialData?.steps?.length ? initialData.steps : [""]
   );
   const [errors, setErrors] = useState({});
+  const [aiLoading, setAiLoading] = useState(false);
+  const [aiError, setAiError] = useState("");
+  const lastAutofillTitle = useRef("");
+
+  // ── AI autofill ───────────────────────────────────────────────
+  async function handleAutofill() {
+    const title = fields.title.trim();
+    if (!title) return;
+    setAiLoading(true);
+    setAiError("");
+    try {
+      const suggestion = await fetchRecipeSuggestion(title);
+      lastAutofillTitle.current = title;
+      setFields((prev) => ({
+        ...prev,
+        category: CATEGORIES.includes(suggestion.category) ? suggestion.category : prev.category,
+        cookTime: suggestion.cookTime != null ? String(suggestion.cookTime) : prev.cookTime,
+        servings: suggestion.servings != null ? String(suggestion.servings) : prev.servings,
+        notes: suggestion.notes ?? prev.notes,
+      }));
+      if (Array.isArray(suggestion.ingredients) && suggestion.ingredients.length > 0) {
+        setIngredients(suggestion.ingredients.map((ing) => ({
+          name: ing.name ?? "",
+          amount: ing.amount ?? "",
+          unit: ing.unit ?? "",
+        })));
+      }
+      if (Array.isArray(suggestion.steps) && suggestion.steps.length > 0) {
+        setSteps(suggestion.steps);
+      }
+    } catch {
+      setAiError("Autofill failed — is Ollama running?");
+    } finally {
+      setAiLoading(false);
+    }
+  }
 
   // ── Basic fields ──────────────────────────────────────────────
   function handleChange(e) {
@@ -110,16 +171,29 @@ export default function RecipeForm({ onSubmit, onCancel, saving = false, saveErr
         <label className="block text-sm font-medium text-amber-900 mb-1">
           Title <span className="text-red-500">*</span>
         </label>
-        <input
-          type="text"
-          name="title"
-          value={fields.title}
-          onChange={handleChange}
-          placeholder="e.g. Banana Pancakes"
-          className={inputCls(errors.title)}
-        />
+        <div className="flex gap-2">
+          <input
+            type="text"
+            name="title"
+            value={fields.title}
+            onChange={handleChange}
+            placeholder="e.g. Banana Pancakes"
+            className={inputCls(errors.title)}
+          />
+          <button
+            type="button"
+            onClick={handleAutofill}
+            disabled={aiLoading || !fields.title.trim()}
+            className="shrink-0 px-3 py-2 text-xs font-medium text-amber-700 bg-amber-100 hover:bg-amber-200 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
+          >
+            {aiLoading ? "Filling…" : "Auto Fill"}
+          </button>
+        </div>
         {errors.title && (
           <p className="text-red-500 text-xs mt-1">{errors.title}</p>
+        )}
+        {aiError && (
+          <p className="text-orange-500 text-xs mt-1">{aiError}</p>
         )}
       </div>
 

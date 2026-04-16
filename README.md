@@ -1,73 +1,83 @@
 # Recipe Box
 
-A personal recipe manager where users can save, organize, and rate their favorite recipes. Each user 
-has their own private recipe collection that syncs across devices.
+A personal recipe manager to save, organize, and rate your favorite recipes. Each account has its own private collection that syncs across devices.
 
 ## Features
-1. Add, edit, and delete recipes
-2. Search by title or ingredient
-3. Filter by category
-4. Serving size scaler
-5. Star rating + Tried It toggle
-6. User authentication
-7. User profile with editable display name
-8. Cloud database with user-specific data
+
+- Add, edit, and delete recipes
+- Search by title or ingredient
+- Filter by category
+- Serving size scaler
+- Star rating and "Tried It" toggle
+- **AI Auto Fill** — type a title and let a local AI suggest the rest (optional, requires Ollama)
+
+## Getting Started
+
+**Prerequisites:** [Node.js](https://nodejs.org/) v18+ and a free [Firebase](https://firebase.google.com/) account.
+
+### 1. Clone and install
+
+```bash
+git clone https://github.com/jooweeah/Recipe-Box.git
+cd Recipe-Box
+npm install
+```
+
+### 2. Set up Firebase
+
+1. Create a project at [console.firebase.google.com](https://console.firebase.google.com/)
+2. Enable **Email/Password** under **Build → Authentication**
+3. Create a **Firestore Database** and set the security rules to:
+
+```
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    match /recipes/{recipeId} {
+      allow read, write: if request.auth != null && request.auth.uid == resource.data.userId;
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+    }
+  }
+}
+```
+
+4. Go to **Project Settings → Your apps**, register a Web app, and copy the config
+
+### 3. Add environment variables
+
+Create a `.env` file in the project root and fill in your Firebase config values:
+
+```
+VITE_FIREBASE_API_KEY=
+VITE_FIREBASE_AUTH_DOMAIN=
+VITE_FIREBASE_PROJECT_ID=
+VITE_FIREBASE_STORAGE_BUCKET=
+VITE_FIREBASE_MESSAGING_SENDER_ID=
+VITE_FIREBASE_APP_ID=
+```
+
+### 4. Run
+
+```bash
+npm run dev
+```
+
+Open [http://localhost:5173](http://localhost:5173) in your browser.
+
+## AI Auto Fill (Optional)
+
+Install [Ollama](https://ollama.com/), then run:
+
+```bash
+ollama pull gemma4:e2b
+ollama serve
+```
+
+The **Auto Fill** button on the new recipe form will suggest ingredients, steps, and more based on the title. If Ollama isn't running, the button shows an error and the rest of the app works normally.
 
 ## Tech Stack
-- React (Vite, JavaScript + SWC)
-- Firebase Auth + Firestore
-- Tailwind CSS
-- Deployed on Netlify
 
-## Setup
-1. Clone the repo
-2. Run `npm install`
-3. Add Firebase config to `.env`
-4. Run `npm run dev`
-
-## Known Bugs / Limitations
-- Avatar image upload not implemented.
-- No recipe images. Recipes have no photo field.
-- No recipe sharing. All recipes are private to the logged-in user.
-- No email/password change on the profile page. Firebase requires re-authentication for these, which wasn't implemented.
-
-## What I Learned
-Building Recipe Box taught me how specific prompts can greatly assist with getting exactly what I want in an application. What was harder than I expected was working with Firestone for the first time and figuring out how to set it up. I had to use Claude to assist me with the steps, and it was extremely helpful guiding me through that. However, I wish Claude still was more helpful in finding bugs in its own code. I wish that next time I would have more testing, maybe with the help of other people, to help me identify bugs that both me and Claude couldn't find initally.
-
-
-## Architecture Overview
-
-### Frontend
-- React (Vite) single-page application
-- React Router for navigation and protected routes
-- Components: Login, Signup, Dashboard, RecipeForm,  RecipeDetail, Profile
-- Firebase SDK handles auth state and Firestore queries
-
-### Backend (Firebase)
-- **Firebase Auth** — email/password authentication, 
-  session persistence
-- **Firestore Database** — cloud storage for recipes 
-  and user profiles
-
-### Database Structure
-users/{userId}
-  - displayName: string
-  - createdAt: timestamp
-
-recipes/{recipeId}
-  - userId: string
-  - title: string
-  - category: string
-  - cookTime: string
-  - servings: number
-  - ingredients: [{ name, amount, unit }]
-  - steps: [string]
-  - rating: number
-  - triedIt: boolean
-  - notes: string
-  - createdAt: timestamp
-
-### Security
-- Firestore rules restrict all reads/writes to the 
-  authenticated user who owns the data
-- Protected routes redirect unauthenticated users to login
+React + Vite · Firebase Auth + Firestore · Tailwind CSS · React Router
