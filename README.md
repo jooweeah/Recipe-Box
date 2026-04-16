@@ -67,7 +67,7 @@ npm run dev
 
 Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-## AI Auto Fill (Optional)
+## AI Auto Fill
 
 Install [Ollama](https://ollama.com/), then run:
 

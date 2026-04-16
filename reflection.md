@@ -12,4 +12,4 @@
 - I learned that my application is only usable if Ollama is installed, so I created a new repository so it is separated from the app I had already built to avoid it from being deployed onto my website. I also learned that you must prompt the llm how to behave if you are using it for a certain feature, and not a general llm. For example, this was written in the code: "You are a recipe assistant. Given a recipe title, return a JSON object with these exact keys:..."
 
 4. What would you do differently next time? If you had another week, what would you improve or try instead?
-- Next time I would try to figure out another API feature to add, but one that does not run locally. Now I wish I could add the AI generate recipe feature to my website, however many of them cost money. I would likely try out Google AI Studio in the future.
+- Next time I would try to figure out another API feature to add, but one that does not run locally. Now I wish I could add the AI generate recipe feature to my website, however many cloud APIs cost money. I would likely try out Google AI Studio in the future.
