@@ -100,7 +100,7 @@ export default function RecipeDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-amber-50 flex items-center justify-center">
+      <div className="min-h-screen bg-amber-100 flex items-center justify-center">
         <p className="text-amber-500">Loading…</p>
       </div>
     );
@@ -108,7 +108,7 @@ export default function RecipeDetail() {
 
   if (fetchError) {
     return (
-      <div className="min-h-screen bg-amber-50 flex flex-col items-center justify-center gap-4">
+      <div className="min-h-screen bg-amber-100 flex flex-col items-center justify-center gap-4">
         <p className="text-red-600 text-lg font-medium">Couldn't load this recipe.</p>
         <p className="text-sm text-gray-500">Check your connection and try again.</p>
         <button onClick={() => navigate("/")} className="text-sm text-amber-600 underline">
@@ -120,7 +120,7 @@ export default function RecipeDetail() {
 
   if (notFound) {
     return (
-      <div className="min-h-screen bg-amber-50 flex flex-col items-center justify-center gap-4">
+      <div className="min-h-screen bg-amber-100 flex flex-col items-center justify-center gap-4">
         <p className="text-amber-700 text-lg font-medium">Recipe not found.</p>
         <button
           onClick={() => navigate("/")}
@@ -142,15 +142,16 @@ export default function RecipeDetail() {
     notes,
     rating = 0,
     triedIt = false,
+    imageUrl,
   } = recipe;
 
   const badgeCls = CATEGORY_COLORS[category] ?? "bg-gray-100 text-gray-700";
   const factor = servings && scaledServings ? scaledServings / servings : 1;
 
   return (
-    <div className="min-h-screen bg-amber-50">
+    <div className="min-h-screen bg-amber-100">
       {/* Header */}
-      <header className="bg-white shadow-sm px-6 py-4 flex items-center gap-4">
+      <header className="bg-white shadow px-6 py-4 flex items-center gap-4">
         <button
           onClick={() => navigate("/")}
           className="text-amber-600 hover:text-amber-800 text-sm font-medium transition-colors"
@@ -165,6 +166,14 @@ export default function RecipeDetail() {
           <span className="text-lg font-bold text-amber-800">Recipe Box</span>
         </button>
       </header>
+
+      {imageUrl ? (
+        <img src={imageUrl} alt={title} className="w-full h-64 object-cover" />
+      ) : (
+        <div className="w-full h-64 bg-gradient-to-br from-amber-100 to-amber-200 flex items-center justify-center">
+          <span className="text-7xl opacity-40">🍳</span>
+        </div>
+      )}
 
       <main className="max-w-2xl mx-auto px-6 py-10">
         {actionError && (
@@ -245,7 +254,7 @@ export default function RecipeDetail() {
         {ingredients.length > 0 && (
           <section className="mb-8">
             <h2 className="text-lg font-bold text-amber-800 mb-3">Ingredients</h2>
-            <ul className="bg-white rounded-2xl border border-amber-100 divide-y divide-amber-50">
+            <ul className="bg-white rounded-2xl border border-amber-200 divide-y divide-amber-100">
               {ingredients.map((ing, i) => (
                 <li key={i} className="flex items-center justify-between px-4 py-3">
                   <span className="text-gray-800 font-medium text-base">{ing.name}</span>
@@ -281,7 +290,7 @@ export default function RecipeDetail() {
         {notes && (
           <section>
             <h2 className="text-lg font-bold text-amber-800 mb-3">Notes</h2>
-            <p className="text-sm text-gray-600 bg-white rounded-2xl border border-amber-100 px-4 py-3 leading-relaxed whitespace-pre-line">
+            <p className="text-sm text-gray-600 bg-white rounded-2xl border border-amber-200 px-4 py-3 leading-relaxed whitespace-pre-line">
               {notes}
             </p>
           </section>

@@ -3,15 +3,23 @@ import StarRating from "./StarRating";
 import { CATEGORY_COLORS } from "../constants";
 
 export default function RecipeCard({ recipe, onEdit, onDelete, onRate, onToggleTried, deleting }) {
-  const { title, category, cookTime, servings, ingredients = [], steps = [], notes, rating = 0, triedIt = false } = recipe;
+  const { title, category, cookTime, servings, ingredients = [], steps = [], notes, rating = 0, triedIt = false, imageUrl } = recipe;
   const badgeCls = CATEGORY_COLORS[category] ?? "bg-gray-100 text-gray-700";
   const navigate = useNavigate();
 
   return (
     <div
       onClick={() => navigate(`/recipes/${recipe.id}`)}
-      className="bg-white rounded-2xl shadow-sm border border-amber-100 p-5 flex flex-col gap-3 cursor-pointer hover:shadow-md hover:border-amber-200 transition-shadow duration-150"
+      className="bg-white rounded-2xl shadow-sm border border-amber-200 flex flex-col cursor-pointer hover:shadow-md hover:border-amber-300 transition-shadow duration-150 overflow-hidden"
     >
+      {imageUrl ? (
+        <img src={imageUrl} alt={title} className="w-full h-40 object-cover" />
+      ) : (
+        <div className="w-full h-40 bg-gradient-to-br from-amber-50 to-amber-100 flex items-center justify-center">
+          <span className="text-5xl opacity-30">🍳</span>
+        </div>
+      )}
+      <div className="flex flex-col gap-3 p-5">
       {/* Header */}
       <div className="flex items-start justify-between gap-2">
         <h3 className="text-base font-bold text-amber-900 leading-snug">{title}</h3>
@@ -77,6 +85,7 @@ export default function RecipeCard({ recipe, onEdit, onDelete, onRate, onToggleT
         >
           {deleting ? "Deleting…" : "Delete"}
         </button>
+      </div>
       </div>
     </div>
   );

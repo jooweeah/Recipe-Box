@@ -46,8 +46,8 @@ export default function Profile() {
   }
 
   return (
-    <div className="min-h-screen bg-amber-50">
-      <header className="bg-white shadow-sm px-6 py-4 flex items-center gap-4">
+    <div className="min-h-screen bg-amber-100">
+      <header className="bg-white shadow px-6 py-4 flex items-center gap-4">
         <button
           onClick={() => navigate("/")}
           className="text-amber-600 hover:text-amber-800 text-sm font-medium transition-colors"
@@ -66,7 +66,7 @@ export default function Profile() {
       <main className="max-w-lg mx-auto px-6 py-10">
         <h1 className="text-3xl font-bold text-amber-800 mb-8">Profile</h1>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-amber-100 p-6 space-y-5">
+        <div className="bg-white rounded-2xl shadow-sm border border-amber-200 p-6 space-y-5">
 
           {/* Avatar initial */}
           <div className="flex items-center gap-4">
@@ -81,7 +81,7 @@ export default function Profile() {
             </div>
           </div>
 
-          <hr className="border-amber-100" />
+          <hr className="border-amber-200" />
 
           {/* Display name field */}
           <div>

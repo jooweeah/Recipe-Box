@@ -6,6 +6,7 @@ A personal recipe manager where you can save, organize, and rate your favorite r
 
 - **Add, edit, and delete** recipes with ingredients, steps, and notes
 - **Serving size scaler** — adjust ingredient amounts on the fly
+- **Cover photos** — automatically fetched from Unsplash when a recipe is saved
 - **Star ratings** and a Tried It toggle
 - **Search** by title or ingredient, **filter** by category
 - **User accounts** — private per-user data, synced via the cloud
@@ -30,20 +31,22 @@ cd Recipe-Box
 npm install
 ```
 
-### 2. Configure Firebase
+### 2. Configure environment variables
 
-Create a `.env` file in the project root with your Firebase project credentials:
+Create a `.env` file in the project root:
 
 ```env
+# Firebase — find these in the Firebase console under Project Settings → Your apps
 VITE_FIREBASE_API_KEY=
 VITE_FIREBASE_AUTH_DOMAIN=
 VITE_FIREBASE_PROJECT_ID=
 VITE_FIREBASE_STORAGE_BUCKET=
 VITE_FIREBASE_MESSAGING_SENDER_ID=
 VITE_FIREBASE_APP_ID=
-```
 
-You can find these values in your [Firebase console](https://console.firebase.google.com/) under **Project Settings → Your apps**.
+# Unsplash — find this in your Unsplash app dashboard under Keys
+VITE_UNSPLASH_ACCESS_KEY=
+```
 
 ### 3. Run locally
 
@@ -58,6 +61,7 @@ src/
 ├── components/      # Reusable UI (RecipeCard, RecipeForm, StarRating, …)
 ├── context/         # Auth state (AuthContext)
 ├── pages/           # Route-level views (Dashboard, RecipeDetail, Profile, …)
+├── utils/           # Standalone helpers (Unsplash image fetch)
 ├── constants.js     # Shared UI constants (category colors)
 └── firebase.js      # Firebase init + Firestore path helpers
 ```

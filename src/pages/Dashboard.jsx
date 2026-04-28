@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from "react";
 import { signOut } from "firebase/auth";
 import { addDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, query, orderBy } from "firebase/firestore";
 import { auth, userRecipesRef, userRecipeRef } from "../firebase";
+import { fetchRecipeImage } from "../utils/unsplash";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import RecipeForm from "../components/RecipeForm";
@@ -78,6 +79,7 @@ export default function Dashboard() {
     setEditingRecipe(recipe);
     setSaveError("");
     setShowForm(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   function closeForm() {
@@ -97,12 +99,21 @@ export default function Dashboard() {
           updatedAt: serverTimestamp(),
         });
         setSuccessMessage(`"${data.title}" updated!`);
+        const titleChanged = data.title !== editingRecipe.title;
+        if (titleChanged || !editingRecipe.imageUrl) {
+          fetchRecipeImage(data.title)
+            .then((imageUrl) => { if (imageUrl) updateDoc(userRecipeRef(user.uid, editingRecipe.id), { imageUrl }); })
+            .catch(() => {});
+        }
       } else {
-        await addDoc(userRecipesRef(user.uid), {
+        const docRef = await addDoc(userRecipesRef(user.uid), {
           ...data,
           createdAt: serverTimestamp(),
         });
         setSuccessMessage(`"${data.title}" saved!`);
+        fetchRecipeImage(data.title)
+          .then((imageUrl) => { if (imageUrl) updateDoc(docRef, { imageUrl }); })
+          .catch(() => {});
       }
       closeForm();
       clearTimeout(successTimerRef.current);
@@ -175,8 +186,8 @@ export default function Dashboard() {
 
   // ── Render ────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-amber-50">
-      <header className="bg-white shadow-sm px-6 py-4 flex items-center justify-between">
+    <div className="min-h-screen bg-amber-100">
+      <header className="bg-white shadow px-6 py-4 flex items-center justify-between">
         <button
           onClick={() => navigate("/")}
           className="flex items-center gap-2 hover:opacity-75 transition-opacity"
