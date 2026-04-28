@@ -1,13 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import StarRating from "./StarRating";
-
-const CATEGORY_COLORS = {
-  breakfast: "bg-yellow-100 text-yellow-800",
-  lunch:     "bg-green-100 text-green-800",
-  dinner:    "bg-blue-100 text-blue-800",
-  dessert:   "bg-pink-100 text-pink-800",
-  snack:     "bg-purple-100 text-purple-800",
-};
+import { CATEGORY_COLORS } from "../constants";
 
 export default function RecipeCard({ recipe, onEdit, onDelete, onRate, onToggleTried, deleting }) {
   const { title, category, cookTime, servings, ingredients = [], steps = [], notes, rating = 0, triedIt = false } = recipe;

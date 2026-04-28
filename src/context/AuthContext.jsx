@@ -2,14 +2,16 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "../firebase";
 
-const AuthContext = createContext({ user: undefined, refreshUser: () => {} });
+const AuthContext = createContext({ user: null, loading: true, refreshUser: () => {} });
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(undefined); // undefined = loading
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       setUser(firebaseUser ?? null);
+      setLoading(false);
     });
     return unsubscribe;
   }, []);
@@ -22,7 +24,7 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, refreshUser }}>
       {children}
     </AuthContext.Provider>
   );
@@ -31,7 +33,8 @@ export function AuthProvider({ children }) {
 // Hooks are intentionally co-located with their provider.
 // eslint-disable-next-line react-refresh/only-export-components
 export function useAuth() {
-  return useContext(AuthContext).user;
+  const { user, loading } = useContext(AuthContext);
+  return { user, loading };
 }
 
 // eslint-disable-next-line react-refresh/only-export-components

@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { updateProfile } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
-import { auth, db } from "../firebase";
+import { setDoc } from "firebase/firestore";
+import { auth, userDocRef } from "../firebase";
 import { useAuth, useRefreshUser } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 
 export default function Profile() {
-  const user = useAuth();
+  const { user } = useAuth();
   const refreshUser = useRefreshUser();
   const navigate = useNavigate();
 
@@ -26,11 +26,7 @@ export default function Profile() {
     setError("");
     try {
       await updateProfile(auth.currentUser, { displayName: trimmed });
-      await setDoc(
-        doc(db, "users", user.uid),
-        { displayName: trimmed },
-        { merge: true }
-      );
+      await setDoc(userDocRef(user.uid), { displayName: trimmed }, { merge: true });
       refreshUser();
       setEditing(false);
       setSuccess(true);

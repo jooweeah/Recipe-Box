@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { getDoc, updateDoc } from "firebase/firestore";
 import StarRating from "../components/StarRating";
-import { db } from "../firebase";
+import { userRecipeRef } from "../firebase";
 import { useAuth } from "../context/AuthContext";
+import { CATEGORY_COLORS } from "../constants";
 
 // ── Scaling helpers ───────────────────────────────────────────────────────────
 
@@ -34,17 +35,9 @@ function scaleAmount(amountStr, factor) {
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-const CATEGORY_COLORS = {
-  breakfast: "bg-yellow-100 text-yellow-800",
-  lunch:     "bg-green-100 text-green-800",
-  dinner:    "bg-blue-100 text-blue-800",
-  dessert:   "bg-pink-100 text-pink-800",
-  snack:     "bg-purple-100 text-purple-800",
-};
-
 export default function RecipeDetail() {
   const { id } = useParams();
-  const user = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const [recipe, setRecipe] = useState(null);
@@ -64,7 +57,7 @@ export default function RecipeDetail() {
   useEffect(() => {
     async function fetchRecipe() {
       try {
-        const snap = await getDoc(doc(db, "users", user.uid, "recipes", id));
+        const snap = await getDoc(userRecipeRef(user.uid, id));
         if (!snap.exists()) {
           setNotFound(true);
         } else {
@@ -85,7 +78,7 @@ export default function RecipeDetail() {
   async function handleRate(newRating) {
     setRecipe((r) => ({ ...r, rating: newRating }));
     try {
-      await updateDoc(doc(db, "users", user.uid, "recipes", id), { rating: newRating });
+      await updateDoc(userRecipeRef(user.uid, id), { rating: newRating });
     } catch (err) {
       console.error("Failed to save rating:", err);
       setRecipe((r) => ({ ...r, rating: recipe?.rating ?? 0 }));
@@ -97,7 +90,7 @@ export default function RecipeDetail() {
     const newVal = !recipe?.triedIt;
     setRecipe((r) => ({ ...r, triedIt: newVal }));
     try {
-      await updateDoc(doc(db, "users", user.uid, "recipes", id), { triedIt: newVal });
+      await updateDoc(userRecipeRef(user.uid, id), { triedIt: newVal });
     } catch (err) {
       console.error("Failed to update tried status:", err);
       setRecipe((r) => ({ ...r, triedIt: !newVal }));

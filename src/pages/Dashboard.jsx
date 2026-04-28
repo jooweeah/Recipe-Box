@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { signOut } from "firebase/auth";
-import { collection, addDoc, updateDoc, deleteDoc, doc, onSnapshot, serverTimestamp, query, orderBy } from "firebase/firestore";
-import { auth, db } from "../firebase";
+import { addDoc, updateDoc, deleteDoc, onSnapshot, serverTimestamp, query, orderBy } from "firebase/firestore";
+import { auth, userRecipesRef, userRecipeRef } from "../firebase";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import RecipeForm from "../components/RecipeForm";
@@ -9,7 +9,7 @@ import RecipeCard from "../components/RecipeCard";
 import ConfirmDialog from "../components/ConfirmDialog";
 
 export default function Dashboard() {
-  const user = useAuth();
+  const { user } = useAuth();
   const navigate = useNavigate();
 
   const [recipes, setRecipes] = useState([]);
@@ -40,8 +40,7 @@ export default function Dashboard() {
 
   // ── Real-time listener ────────────────────────────────────────
   useEffect(() => {
-    const recipesRef = collection(db, "users", user.uid, "recipes");
-    const q = query(recipesRef, orderBy("createdAt", "desc"));
+    const q = query(userRecipesRef(user.uid), orderBy("createdAt", "desc"));
     const unsubscribe = onSnapshot(q, (snapshot) => {
       setRecipes(snapshot.docs.map((d) => ({ id: d.id, ...d.data() })));
       setLoadingRecipes(false);
@@ -93,13 +92,13 @@ export default function Dashboard() {
     setSaveError("");
     try {
       if (editingRecipe) {
-        await updateDoc(doc(db, "users", user.uid, "recipes", editingRecipe.id), {
+        await updateDoc(userRecipeRef(user.uid, editingRecipe.id), {
           ...data,
           updatedAt: serverTimestamp(),
         });
         setSuccessMessage(`"${data.title}" updated!`);
       } else {
-        await addDoc(collection(db, "users", user.uid, "recipes"), {
+        await addDoc(userRecipesRef(user.uid), {
           ...data,
           createdAt: serverTimestamp(),
         });
@@ -119,7 +118,7 @@ export default function Dashboard() {
   // ── Rating + Tried It ─────────────────────────────────────────
   async function handleRate(recipe, rating) {
     try {
-      await updateDoc(doc(db, "users", user.uid, "recipes", recipe.id), { rating });
+      await updateDoc(userRecipeRef(user.uid, recipe.id), { rating });
     } catch (err) {
       console.error("Failed to save rating:", err);
       showActionError("Rating couldn't be saved. Please try again.");
@@ -128,7 +127,7 @@ export default function Dashboard() {
 
   async function handleToggleTried(recipe) {
     try {
-      await updateDoc(doc(db, "users", user.uid, "recipes", recipe.id), { triedIt: !recipe.triedIt });
+      await updateDoc(userRecipeRef(user.uid, recipe.id), { triedIt: !recipe.triedIt });
     } catch (err) {
       console.error("Failed to update tried status:", err);
       showActionError("Couldn't update status. Please try again.");
@@ -149,7 +148,7 @@ export default function Dashboard() {
   async function confirmDelete(recipe) {
     setDeletingId(recipe.id);
     try {
-      await deleteDoc(doc(db, "users", user.uid, "recipes", recipe.id));
+      await deleteDoc(userRecipeRef(user.uid, recipe.id));
     } catch (err) {
       console.error(err);
       setDialog({
