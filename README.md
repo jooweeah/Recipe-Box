@@ -36,3 +36,5 @@ Defined identically in both RecipeCard.jsx and RecipeDetail.jsx. Extract it to a
 In AuthContext.jsx, undefined = loading, null = logged out, and an object = logged in. 
 
 4. Delete App.css — it's empty and implies there's per-component CSS when there isn't.
+
+5. Star ratings are easy to miss - Made stars larger with hover scale and brighter empty stars

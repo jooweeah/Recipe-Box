@@ -5,7 +5,7 @@ export default function StarRating({ rating = 0, onRate, disabled = false }) {
   const active = hovered || rating;
 
   return (
-    <div className="flex gap-0.5">
+    <div className="flex gap-1">
       {[1, 2, 3, 4, 5].map((n) => (
         <button
           key={n}
@@ -15,9 +15,9 @@ export default function StarRating({ rating = 0, onRate, disabled = false }) {
           onMouseEnter={() => setHovered(n)}
           onMouseLeave={() => setHovered(0)}
           aria-label={`Rate ${n} star${n !== 1 ? "s" : ""}`}
-          className="leading-none disabled:cursor-default transition-colors"
+          className="leading-none disabled:cursor-default transition-transform hover:scale-125 active:scale-110"
         >
-          <span className={active >= n ? "text-amber-400" : "text-gray-200"}>★</span>
+          <span className={`text-xl ${active >= n ? "text-amber-400" : "text-gray-300"}`}>★</span>
         </button>
       ))}
     </div>
