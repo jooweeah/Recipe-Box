@@ -19,7 +19,7 @@ A personal recipe manager where you can save, organize, and rate your favorite r
 | Frontend | React 19 + Vite (SWC) |
 | Styling | Tailwind CSS 4 |
 | Auth & Database | Firebase (Auth + Firestore) |
-| Hosting | Netlify |
+| Hosting | Netlify, Vercel |
 
 ## Getting Started
 
